@@ -1,15 +1,34 @@
 trigger: none
-pool: default
+
+pool:
+  vmImage: 'windows-latest'
 
 stages:
 - stage: infrapipeline
   jobs:
   - job: infraJob
     steps:
-     - task: PowerShell@2
-       inputs:
-         targetType: 'inline'
-         script: |
-           # Write your PowerShell commands here.
-           
-           Write-Host "Hello World"
+    - task: PowerShell@2
+      inputs:
+        targetType: 'inline'
+        script: |
+          Write-Host "Hello World"
+
+    - task: TerraformInstaller@1
+      inputs:
+        terraformVersion: 'latest'
+
+    - task: TerraformTaskV4@4
+      inputs:
+        provider: 'azurerm'
+        command: 'init'
+        workingDirectory: '$(System.DefaultWorkingDirectory)/_telcoinfra/Azurerm_resource_group'
+        backendServiceArm: 'infracreation'
+
+    - task: TerraformTaskV4@4
+      inputs:
+        provider: 'azurerm'
+        command: 'apply'
+        commandOptions: '-auto-approve'
+        workingDirectory: '$(System.DefaultWorkingDirectory)/_telcoinfra/Azurerm_resource_group'
+        backendServiceArm: 'infracreation'
